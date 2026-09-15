@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.2.0 https://maven.apache.org/xsd/assembly-2.2.0.xsd">
+  <id>plugin</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <baseDirectory>.</baseDirectory>
+
+  <files>
+    <file>
+      <source>${project.basedir}/src/main/resources/version.xml</source>
+      <outputDirectory>plugins/transforms/pentaho-formula</outputDirectory>
+      <filtered>true</filtered>
+    </file>
+    <file>
+      <source>${maven.multiModuleProjectDirectory}/LICENSE</source>
+      <outputDirectory>plugins/transforms/pentaho-formula</outputDirectory>
+    </file>
+    <file>
+      <source>${maven.multiModuleProjectDirectory}/NOTICE</source>
+      <outputDirectory>plugins/transforms/pentaho-formula</outputDirectory>
+    </file>
+  </files>
+
+  <fileSets>
+    <fileSet>
+      <directory>${maven.multiModuleProjectDirectory}/samples</directory>
+      <outputDirectory>config/projects/samples/transforms</outputDirectory>
+      <includes>
+        <include>*.hpl</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+
+  <dependencySets>
+    <dependencySet>
+      <useProjectArtifact>false</useProjectArtifact>
+      <outputDirectory>plugins/transforms/pentaho-formula</outputDirectory>
+      <includes>
+        <include>org.projectdatahopper.hop:hop-transform-pentaho-formula:jar</include>
+      </includes>
+      <outputFileNameMapping>${artifact.artifactId}-${artifact.version}.${artifact.extension}</outputFileNameMapping>
+    </dependencySet>
+
+    <dependencySet>
+      <useProjectArtifact>false</useProjectArtifact>
+      <useTransitiveDependencies>true</useTransitiveDependencies>
+      <outputDirectory>plugins/transforms/pentaho-formula/lib</outputDirectory>
+      <scope>runtime</scope>
+      <excludes>
+        <exclude>org.projectdatahopper.hop:hop-transform-pentaho-formula</exclude>
+        <exclude>org.apache.hop:*</exclude>
+        <exclude>org.projectlombok:*</exclude>
+        <exclude>io.smallrye:*</exclude>
+        <exclude>org.junit.jupiter:*</exclude>
+        <exclude>org.junit.platform:*</exclude>
+        <exclude>org.opentest4j:*</exclude>
+        <exclude>org.apiguardian:*</exclude>
+        <!-- Hop lib/core — do not ship duplicates (classloader isolation) -->
+        <exclude>org.apache.commons:commons-vfs2</exclude>
+        <exclude>org.apache.commons:commons-io</exclude>
+        <exclude>org.apache.commons:commons-lang3</exclude>
+        <exclude>org.apache.commons:commons-logging</exclude>
+        <exclude>org.apache.commons:commons-codec</exclude>
+        <exclude>org.apache.commons:commons-compress</exclude>
+        <exclude>commons-logging:commons-logging</exclude>
+        <exclude>commons-codec:commons-codec</exclude>
+        <exclude>commons-io:commons-io</exclude>
+        <exclude>org.slf4j:*</exclude>
+        <exclude>com.google.guava:guava</exclude>
+        <exclude>com.google.guava:failureaccess</exclude>
+        <exclude>com.google.guava:listenablefuture</exclude>
+        <exclude>com.google.code.findbugs:jsr305</exclude>
+        <exclude>org.apache.httpcomponents:httpclient</exclude>
+        <exclude>org.apache.httpcomponents:httpcore</exclude>
+      </excludes>
+    </dependencySet>
+  </dependencySets>
+</assembly>

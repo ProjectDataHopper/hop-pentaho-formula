@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.projectdatahopper.hop</groupId>
+    <artifactId>hop-pentaho-formula</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>hop-transform-pentaho-formula</artifactId>
+  <packaging>jar</packaging>
+  <name>Hop Transform - Pentaho Formula</name>
+  <description>
+    Pipeline transform that evaluates OpenFormula expressions with Pentaho libformula,
+    preserving PDI Formula semantics for Apache Hop.
+  </description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-engine</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hop</groupId>
+      <artifactId>hop-ui</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.pentaho.reporting.library</groupId>
+      <artifactId>libformula</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>io.smallrye</groupId>
+        <artifactId>jandex-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

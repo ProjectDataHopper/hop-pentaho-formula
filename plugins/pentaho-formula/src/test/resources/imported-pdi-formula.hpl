@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pipeline>
+  <info>
+    <name>imported-pdi-formula</name>
+  </info>
+  <transform>
+    <name>Calc</name>
+    <type>Formula</type>
+    <formulas>
+      <formula>
+        <field_name>label</field_name>
+        <formula>IF([flag],"Y","N")</formula>
+        <value_type>2</value_type>
+        <value_length>-1</value_length>
+        <value_precision>-1</value_precision>
+        <replace_field/>
+      </formula>
+    </formulas>
+  </transform>
+</pipeline>

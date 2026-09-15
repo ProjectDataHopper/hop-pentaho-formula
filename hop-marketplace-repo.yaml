@@ -1,0 +1,33 @@
+# Hop marketplace repository definition for hop-pentaho-formula (Hop 2.19+).
+#
+#   ./hop marketplace repo import hop-marketplace-repo.yaml
+#   ./hop marketplace install hop-pentaho-formula
+#   # Restart Hop so the plugin registry reloads
+#
+schemaVersion: "1.0"
+kind: hop-marketplace-repository
+
+id: data-hopper-community
+name: Data Hopper Community Plugins
+url: https://repository.data-hopper.com/repository/hop-community-plugins/
+primary: false
+enabled: true
+browse: true
+includeSnapshots: true
+homepage: https://github.com/ProjectDataHopper/hop-pentaho-formula
+description: >
+  Community Maven repository with Project Data Hopper plugins for Apache Hop,
+  including Pentaho Formula (LGPL libformula — not an ASF release).
+
+plugins:
+  - groupId: org.projectdatahopper.hop
+    artifactId: hop-pentaho-formula
+    version: 1.0.0
+    minHopVersion: "2.19.0"
+    name: Pentaho Formula
+    category: Community
+    description: >
+      Evaluate OpenFormula expressions with Pentaho libformula, preserving PDI
+      Formula semantics. Third-party LGPL plugin (not ASF). Distinct from Hop's
+      built-in POI Formula transform.
+    installPath: plugins/transforms/pentaho-formula

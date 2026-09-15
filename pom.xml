@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.projectdatahopper.hop</groupId>
+  <artifactId>hop-pentaho-formula</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <name>Hop Pentaho Formula</name>
+  <description>
+    Third-party Apache Hop transform plugin that evaluates OpenFormula expressions
+    using Pentaho libformula (LGPL). Ports the PDI Formula step. Not an Apache
+    Software Foundation release.
+  </description>
+  <url>https://github.com/ProjectDataHopper/hop-pentaho-formula</url>
+
+  <licenses>
+    <license>
+      <name>GNU Lesser General Public License, Version 2.1</name>
+      <url>https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <modules>
+    <module>plugins/pentaho-formula</module>
+    <module>assemblies/pentaho-formula</module>
+  </modules>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+
+    <!-- Marketplace install UI needs Hop 2.19+. Override: -Dhop.version=2.20.0-SNAPSHOT -->
+    <hop.version>2.19.0</hop.version>
+
+    <!-- LGPL libformula line (9.4 / 10.0 / 10.1). 10.2+ is BSL — do not use. -->
+    <libformula.version>10.1.0.0-SNAPSHOT</libformula.version>
+
+    <marketplace.groupId>org.projectdatahopper.hop</marketplace.groupId>
+    <marketplace.artifactId>hop-pentaho-formula</marketplace.artifactId>
+    <hop.community.nexus.url>https://repository.data-hopper.com/repository/hop-community-plugins/</hop.community.nexus.url>
+    <hop.community.nexus.serverId>hop-community-plugins</hop.community.nexus.serverId>
+    <pentaho.reporting.lgpl.nexus.url>https://repository.data-hopper.com/repository/pentaho-reporting-lgpl/</pentaho.reporting.lgpl.nexus.url>
+
+    <lombok.version>1.18.42</lombok.version>
+    <jandex.version>3.5.3</jandex.version>
+    <junit.version>5.10.2</junit.version>
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+    <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
+    <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+    <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+    <maven-deploy-plugin.version>3.1.3</maven-deploy-plugin.version>
+  </properties>
+
+  <distributionManagement>
+    <repository>
+      <id>${hop.community.nexus.serverId}</id>
+      <name>Data Hopper community Hop plugins (releases)</name>
+      <url>${hop.community.nexus.url}</url>
+    </repository>
+    <snapshotRepository>
+      <id>${hop.community.nexus.serverId}</id>
+      <name>Data Hopper community Hop plugins (snapshots)</name>
+      <url>${hop.community.nexus.url}</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.hop</groupId>
+        <artifactId>hop-core</artifactId>
+        <version>${hop.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hop</groupId>
+        <artifactId>hop-engine</artifactId>
+        <version>${hop.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.hop</groupId>
+        <artifactId>hop-ui</artifactId>
+        <version>${hop.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>${lombok.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.pentaho.reporting.library</groupId>
+        <artifactId>libformula</artifactId>
+        <version>${libformula.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.projectdatahopper.hop</groupId>
+        <artifactId>hop-transform-pentaho-formula</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.junit.jupiter</groupId>
+        <artifactId>junit-jupiter</artifactId>
+        <version>${junit.version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <defaultGoal>package</defaultGoal>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+          <configuration>
+            <release>${maven.compiler.release}</release>
+            <annotationProcessorPaths>
+              <path>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+              </path>
+            </annotationProcessorPaths>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>io.smallrye</groupId>
+          <artifactId>jandex-maven-plugin</artifactId>
+          <version>${jandex.version}</version>
+          <executions>
+            <execution>
+              <id>make-index</id>
+              <goals>
+                <goal>jandex</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <repositories>
+    <repository>
+      <id>central</id>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>apache.snapshots</id>
+      <url>https://repository.apache.org/snapshots/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>pentaho-reporting-lgpl</id>
+      <name>Data Hopper LGPL reporting engine</name>
+      <url>${pentaho.reporting.lgpl.nexus.url}</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+</project>
