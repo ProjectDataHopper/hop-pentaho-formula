@@ -19,8 +19,9 @@ cd "${ROOT}"
 
 GROUP_ID="${GROUP_ID:-org.projectdatahopper.hop}"
 ARTIFACT_ID="${ARTIFACT_ID:-hop-pentaho-formula}"
-NEXUS_URL="${NEXUS_URL:-https://repository.data-hopper.com/repository/hop-community-plugins/}"
-NEXUS_REPO_ID="${NEXUS_REPO_ID:-hop-community-plugins}"
+# Hard defaults: workstation env often has NEXUS_REPO_ID/NEXUS_URL for a different repo.
+NEXUS_URL="https://repository.data-hopper.com/repository/hop-community-plugins/"
+NEXUS_REPO_ID="hop-community-plugins"
 LIBFORMULA_REPO="${LIBFORMULA_REPO:-https://repository.data-hopper.com/repository/pentaho-reporting-lgpl/}"
 LIBFORMULA_VERSION="${LIBFORMULA_VERSION:-10.1.0.0-SNAPSHOT}"
 HOP_VERSION="${HOP_VERSION:-}"

@@ -6,7 +6,7 @@
 |--|--|
 | groupId | `org.projectdatahopper.hop` |
 | artifactId | `hop-pentaho-formula` |
-| version | Maven `project.version` (e.g. `1.0.0-SNAPSHOT`) |
+| version | Maven `project.version` (release: `1.0.0`) |
 | packaging | **zip** (marketplace installable) |
 | Nexus repo | `https://repository.data-hopper.com/repository/hop-community-plugins/` |
 | Jenkins | https://jenkins.data-hopper.com/ |
@@ -88,10 +88,10 @@ Example install session:
 
 ```text
 $ sh hop marketplace install hop-pentaho-formula
-Resolved hop-pentaho-formula → org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT (prefer repo 'data-hopper-community')
-… Marketplace - Downloading org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT from https://repository.data-hopper.com/repository/hop-community-plugins/…
-… Marketplace - Installed org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT. Restart Hop to load the plugin.
-Plugin org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT installed under <HOP_HOME> from repo 'data-hopper-community'. Restart Hop to load it.
+Resolved hop-pentaho-formula → org.projectdatahopper.hop:hop-pentaho-formula:1.0.0 (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.projectdatahopper.hop:hop-pentaho-formula:1.0.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
+… Marketplace - Installed org.projectdatahopper.hop:hop-pentaho-formula:1.0.0. Restart Hop to load the plugin.
+Plugin org.projectdatahopper.hop:hop-pentaho-formula:1.0.0 installed under <HOP_HOME> from repo 'data-hopper-community'. Restart Hop to load it.
 ```
 
 If the repo `data-hopper-community` already exists (from hop-pentaho-reporting or

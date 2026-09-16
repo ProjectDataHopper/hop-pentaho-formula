@@ -10,6 +10,7 @@ with Pentaho **libformula** (LGPL). This is a port of the PDI Formula step for H
 | Hop | 2.19.0+ (Java 21) |
 | Engine | libformula **10.1.x** LGPL |
 | Plugin id | `PentahoFormula` |
+| Marketplace | **1.0.0** (`org.projectdatahopper.hop:hop-pentaho-formula:1.0.0`) |
 | ASF? | **No** — cannot ship inside Apache Hop (LGPL libformula) |
 
 ## Why this exists
@@ -40,7 +41,7 @@ mvn clean package
 Plugin zip:
 
 ```text
-assemblies/pentaho-formula/target/hop-pentaho-formula-1.0.0-SNAPSHOT.zip
+assemblies/pentaho-formula/target/hop-pentaho-formula-1.0.0.zip
 ```
 
 ## Install
@@ -100,9 +101,9 @@ Example install session:
 
 ```text
 $ sh hop marketplace install hop-pentaho-formula
-Resolved hop-pentaho-formula → org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT (prefer repo 'data-hopper-community')
-… Marketplace - Downloading org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT from https://repository.data-hopper.com/repository/hop-community-plugins/…
-… Marketplace - Installed org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT. Restart Hop to load the plugin.
+Resolved hop-pentaho-formula → org.projectdatahopper.hop:hop-pentaho-formula:1.0.0 (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.projectdatahopper.hop:hop-pentaho-formula:1.0.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
+… Marketplace - Installed org.projectdatahopper.hop:hop-pentaho-formula:1.0.0. Restart Hop to load the plugin.
 Plugin … installed under <HOP_HOME> from repo 'data-hopper-community'. Restart Hop to load it.
 ```
 

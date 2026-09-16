@@ -15,7 +15,7 @@
 #   # Restart Hop so the plugin registry reloads
 #
 # Example install session:
-#   Resolved hop-pentaho-formula → org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT
+#   Resolved hop-pentaho-formula → org.projectdatahopper.hop:hop-pentaho-formula:1.0.0
 #   Downloading … from hop-community-plugins
 #   Installed … Restart Hop to load the plugin.
 #
