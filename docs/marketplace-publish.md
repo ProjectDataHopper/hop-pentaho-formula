@@ -6,7 +6,7 @@
 |--|--|
 | groupId | `org.projectdatahopper.hop` |
 | artifactId | `hop-pentaho-formula` |
-| version | Maven `project.version` (release: `1.0.0`) |
+| version | Marketplace release **1.0.0**; `main` is `1.1.0-SNAPSHOT` |
 | packaging | **zip** (marketplace installable) |
 | Nexus repo | `https://repository.data-hopper.com/repository/hop-community-plugins/` |
 | Jenkins | https://jenkins.data-hopper.com/ |
@@ -48,9 +48,14 @@ assembly zip under GAV `org.projectdatahopper.hop:hop-pentaho-formula`.
 
 ## Package & publish (local)
 
+Publish the **release** zip from `releases/1.0.0` (Maven version `1.0.0`). Do not
+publish `main` (`1.1.0-SNAPSHOT`) as the marketplace pin.
+
 ```bash
+git checkout releases/1.0.0
 # libformula must be resolvable (successful pentaho-reporting-lgpl-engine job)
-export NEXUS_USER=... NEXUS_PASSWORD=...
+export NEXUS_USER=hop_community_build NEXUS_PASSWORD=...
+# hop_build is 403 on hop-community-plugins; use hop_community_build
 ./scripts/publish-to-marketplace.sh
 # optional: --hop-version 2.19.0
 # optional: --dry-run

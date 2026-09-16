@@ -10,7 +10,8 @@ with Pentaho **libformula** (LGPL). This is a port of the PDI Formula step for H
 | Hop | 2.19.0+ (Java 21) |
 | Engine | libformula **10.1.x** LGPL |
 | Plugin id | `PentahoFormula` |
-| Marketplace | **1.0.0** (`org.projectdatahopper.hop:hop-pentaho-formula:1.0.0`) |
+| Marketplace | **[1.0.0](https://github.com/ProjectDataHopper/hop-pentaho-formula/releases/tag/v1.0.0)** (`org.projectdatahopper.hop:hop-pentaho-formula:1.0.0`) |
+| `main` | `1.1.0-SNAPSHOT` |
 | ASF? | **No** — cannot ship inside Apache Hop (LGPL libformula) |
 
 ## Why this exists
@@ -41,14 +42,14 @@ mvn clean package
 Plugin zip:
 
 ```text
-assemblies/pentaho-formula/target/hop-pentaho-formula-1.0.0.zip
+assemblies/pentaho-formula/target/hop-pentaho-formula-1.1.0-SNAPSHOT.zip
 ```
 
 ## Install
 
 ### Manual zip
 
-Unzip into the **Hop client root**:
+Download [hop-pentaho-formula-1.0.0.zip](https://github.com/ProjectDataHopper/hop-pentaho-formula/releases/download/v1.0.0/hop-pentaho-formula-1.0.0.zip) and unzip into the **Hop client root**:
 
 ```bash
 unzip hop-pentaho-formula-*.zip -d "$HOP_HOME"
