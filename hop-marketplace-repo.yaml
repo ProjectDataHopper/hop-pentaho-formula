@@ -1,8 +1,26 @@
 # Hop marketplace repository definition for hop-pentaho-formula (Hop 2.19+).
 #
+# Jenkins (or scripts/publish-to-marketplace.sh) publishes the plugin zip to:
+#   https://repository.data-hopper.com/repository/hop-community-plugins/
+#
+# Import into Hop so the plugin appears in marketplace query / install:
+#
+#   ./hop marketplace repo import \
+#     https://raw.githubusercontent.com/ProjectDataHopper/hop-pentaho-formula/refs/heads/main/hop-marketplace-repo.yaml
+#   # or a local path:
 #   ./hop marketplace repo import hop-marketplace-repo.yaml
+#
+#   ./hop marketplace query | grep -i formula
 #   ./hop marketplace install hop-pentaho-formula
 #   # Restart Hop so the plugin registry reloads
+#
+# Example install session:
+#   Resolved hop-pentaho-formula → org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT
+#   Downloading … from hop-community-plugins
+#   Installed … Restart Hop to load the plugin.
+#
+# browse: true → Hop lists *.zip from this Nexus live.
+# Same repo id as hop-pentaho-reporting / hopper-edw: re-import merges plugin metadata.
 #
 schemaVersion: "1.0"
 kind: hop-marketplace-repository
@@ -19,6 +37,7 @@ description: >
   Community Maven repository with Project Data Hopper plugins for Apache Hop,
   including Pentaho Formula (LGPL libformula — not an ASF release).
 
+# Optional metadata (enriches live Nexus list; not a cache)
 plugins:
   - groupId: org.projectdatahopper.hop
     artifactId: hop-pentaho-formula

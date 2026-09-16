@@ -1,0 +1,223 @@
+// Publish hop-pentaho-formula marketplace zip to hop-community-plugins.
+//
+// Jenkins: New Item → Pipeline → Pipeline script from SCM → this repo
+//   Script Path: Jenkinsfile.marketplace
+//   Suggested job name: hop-pentaho-formula-marketplace
+//
+// Prerequisites on the agent:
+//   - libformula 10.1 on pentaho-reporting-lgpl (engine Jenkins job)
+//   - Credential for Nexus deploy (default id: nexus-hop-community)
+//   - JDK 21 + Maven tools (names match tools{} below)
+//
+// After a green build, import hop-marketplace-repo.yaml into Hop 2.19+ and install.
+
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+    timeout(time: 1, unit: 'HOURS')
+  }
+
+  parameters {
+    string(
+      name: 'HOP_VERSION',
+      defaultValue: '2.19.0',
+      description: 'Hop Maven version to compile against (APIs)'
+    )
+    string(
+      name: 'NEXUS_URL',
+      defaultValue: 'https://repository.data-hopper.com/repository/hop-community-plugins/',
+      description: 'Marketplace Maven repository base URL'
+    )
+    string(
+      name: 'NEXUS_SERVER_ID',
+      defaultValue: 'hop-community-plugins',
+      description: 'settings.xml server id / deploy repositoryId'
+    )
+    string(
+      name: 'NEXUS_CREDENTIALS_ID',
+      defaultValue: 'nexus-hop-community',
+      description: 'Jenkins Username/Password credential for Nexus deploy'
+    )
+    booleanParam(
+      name: 'SKIP_TESTS',
+      defaultValue: false,
+      description: 'Skip unit tests when packaging'
+    )
+  }
+
+  environment {
+    MAVEN_OPTS = '-Xmx2g'
+    GROUP_ID = 'org.projectdatahopper.hop'
+    ARTIFACT_ID = 'hop-pentaho-formula'
+    LIBFORMULA_VERSION = '10.1.0.0-SNAPSHOT'
+    HOP_VERSION = "${params.HOP_VERSION}"
+    NEXUS_URL = "${params.NEXUS_URL}"
+    NEXUS_SERVER_ID = "${params.NEXUS_SERVER_ID}"
+    SKIP_TESTS = "${params.SKIP_TESTS}"
+  }
+
+  tools {
+    jdk 'jdk-21'
+    maven 'Maven 3.9.9'
+  }
+
+  stages {
+    stage('Show toolchain') {
+      steps {
+        sh '''
+          set -euo pipefail
+          java -version
+          mvn -version
+        '''
+      }
+    }
+
+    stage('Check libformula on Maven') {
+      steps {
+        sh '''
+          set -euo pipefail
+          # The zip packages libformula (+ deps) from Maven into plugin lib/.
+          echo "Resolving libformula for packaging (hop.version=${HOP_VERSION})..."
+          if mvn -B -q dependency:get \
+              -Dartifact=org.pentaho.reporting.library:libformula:${LIBFORMULA_VERSION} \
+              -DremoteRepositories=https://repository.data-hopper.com/repository/pentaho-reporting-lgpl/ \
+              2>/dev/null; then
+            echo "OK: libformula available from pentaho-reporting-lgpl Nexus"
+          else
+            echo "ERROR: Need LGPL libformula to package into the marketplace zip."
+            echo "  Run job pentaho-reporting-lgpl-engine so libformula is on pentaho-reporting-lgpl."
+            exit 1
+          fi
+        '''
+      }
+    }
+
+    stage('Prepare Maven settings') {
+      steps {
+        withCredentials([usernamePassword(
+            credentialsId: "${params.NEXUS_CREDENTIALS_ID}",
+            usernameVariable: 'NEXUS_USER',
+            passwordVariable: 'NEXUS_PASS')]) {
+          script {
+            def xmlEscape = { String s ->
+              if (s == null) return ''
+              return s.replace('&', '&amp;')
+                  .replace('<', '&lt;')
+                  .replace('>', '&gt;')
+                  .replace('"', '&quot;')
+                  .replace("'", '&apos;')
+            }
+            def userXml = xmlEscape(env.NEXUS_USER)
+            def passXml = xmlEscape(env.NEXUS_PASS)
+            def serverId = xmlEscape(env.NEXUS_SERVER_ID)
+            def deployUrl = xmlEscape(env.NEXUS_URL)
+            writeFile file: "${env.WORKSPACE}/ci-settings.xml", text: """\
+<?xml version="1.0" encoding="UTF-8"?>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0">
+  <servers>
+    <server>
+      <id>${serverId}</id>
+      <username>${userXml}</username>
+      <password>${passXml}</password>
+    </server>
+  </servers>
+  <profiles>
+    <profile>
+      <id>data-hopper</id>
+      <repositories>
+        <repository>
+          <id>central</id>
+          <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+        <repository>
+          <id>pentaho-reporting-lgpl</id>
+          <url>https://repository.data-hopper.com/repository/pentaho-reporting-lgpl/</url>
+          <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+        <repository>
+          <id>${serverId}</id>
+          <url>${deployUrl}</url>
+          <snapshots><enabled>true</enabled></snapshots>
+        </repository>
+      </repositories>
+    </profile>
+  </profiles>
+  <activeProfiles>
+    <activeProfile>data-hopper</activeProfile>
+  </activeProfiles>
+</settings>
+"""
+          }
+        }
+      }
+    }
+
+    stage('Package plugin zip') {
+      steps {
+        sh '''
+          set -euo pipefail
+          TEST_FLAGS=""
+          if [ "${SKIP_TESTS}" = "true" ]; then
+            TEST_FLAGS="-DskipTests"
+          fi
+          # Packages transform jar + libformula (+ deps) into the zip under lib/
+          mvn -B -s "${WORKSPACE}/ci-settings.xml" clean package ${TEST_FLAGS} \
+            -Dhop.version="${HOP_VERSION}" \
+            -Dlibformula.version="${LIBFORMULA_VERSION}"
+        '''
+      }
+    }
+
+    stage('Deploy zip to hop-community-plugins') {
+      steps {
+        sh '''
+          set -euo pipefail
+          PLUGIN_VERSION="$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version -Dhop.version="${HOP_VERSION}" | tail -1)"
+          ZIP="${WORKSPACE}/assemblies/pentaho-formula/target/${ARTIFACT_ID}-${PLUGIN_VERSION}.zip"
+          if [ ! -f "${ZIP}" ]; then
+            echo "Missing ${ZIP}"
+            ls -la "${WORKSPACE}/assemblies/pentaho-formula/target/" || true
+            exit 1
+          fi
+          echo "Deploying ${GROUP_ID}:${ARTIFACT_ID}:${PLUGIN_VERSION}"
+          mvn -B -s "${WORKSPACE}/ci-settings.xml" \
+            org.apache.maven.plugins:maven-deploy-plugin:3.1.3:deploy-file \
+            -DgroupId="${GROUP_ID}" \
+            -DartifactId="${ARTIFACT_ID}" \
+            -Dversion="${PLUGIN_VERSION}" \
+            -Dpackaging=zip \
+            -Dfile="${ZIP}" \
+            -DgeneratePom=true \
+            -DrepositoryId="${NEXUS_SERVER_ID}" \
+            -Durl="${NEXUS_URL}"
+
+          # Use sed (portable); ${var//.//} is bash-only and fails under /bin/sh (dash)
+          GROUP_PATH="$(printf '%s' "${GROUP_ID}" | sed 's|\\.|/|g')"
+          PUBLISH_URL="${NEXUS_URL}${GROUP_PATH}/${ARTIFACT_ID}/${PLUGIN_VERSION}/${ARTIFACT_ID}-${PLUGIN_VERSION}.zip"
+          {
+            echo "groupId=${GROUP_ID}"
+            echo "artifactId=${ARTIFACT_ID}"
+            echo "version=${PLUGIN_VERSION}"
+            echo "hop.version=${HOP_VERSION}"
+            echo "url=${PUBLISH_URL}"
+            echo "built_at_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } | tee "${WORKSPACE}/MARKETPLACE-PUBLISH.txt"
+        '''
+        archiveArtifacts artifacts: 'MARKETPLACE-PUBLISH.txt,assemblies/pentaho-formula/target/*.zip', fingerprint: true
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "Marketplace zip published. Import hop-marketplace-repo.yaml in Hop 2.19+ and install hop-pentaho-formula."
+    }
+    failure {
+      echo "Publish failed. Check console: deploy may have succeeded while a later shell step failed."
+    }
+  }
+}

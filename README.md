@@ -45,6 +45,8 @@ assemblies/pentaho-formula/target/hop-pentaho-formula-1.0.0-SNAPSHOT.zip
 
 ## Install
 
+### Manual zip
+
 Unzip into the **Hop client root**:
 
 ```bash
@@ -62,9 +64,56 @@ $HOP_HOME/plugins/transforms/pentaho-formula/
   lib/          # libformula, libbase, …
 ```
 
-Restart Hop. The transform appears as **Pentaho Formula** in the Scripting category.
+Restart Hop. The transform appears as **Pentaho Formula** in the Scripting category
+(plugin id `PentahoFormula`).
 
 Hop's built-in POI Formula transform remains installed and is a different plugin.
+
+### Hop 2.19 marketplace (Nexus)
+
+You publish **one zip** that already includes the transform **and** libformula
+jars under `lib/`. Users only install that zip.
+
+```bash
+# After libformula is on pentaho-reporting-lgpl (engine Jenkins job)
+export NEXUS_USER=... NEXUS_PASSWORD=...
+./scripts/publish-to-marketplace.sh
+```
+
+Details: [docs/marketplace-publish.md](docs/marketplace-publish.md).
+
+Users (Hop **2.19+**):
+
+```bash
+# once: register the Data Hopper community repo
+./hop marketplace repo import hop-marketplace-repo.yaml
+# or:
+# ./hop marketplace repo import \
+#   https://raw.githubusercontent.com/ProjectDataHopper/hop-pentaho-formula/refs/heads/main/hop-marketplace-repo.yaml
+
+./hop marketplace query | grep -i formula
+./hop marketplace install hop-pentaho-formula
+# Restart Hop so the plugin loads
+```
+
+Example install session:
+
+```text
+$ sh hop marketplace install hop-pentaho-formula
+Resolved hop-pentaho-formula → org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT from https://repository.data-hopper.com/repository/hop-community-plugins/…
+… Marketplace - Installed org.projectdatahopper.hop:hop-pentaho-formula:1.0.0-SNAPSHOT. Restart Hop to load the plugin.
+Plugin … installed under <HOP_HOME> from repo 'data-hopper-community'. Restart Hop to load it.
+```
+
+After restart, the transform **Pentaho Formula** appears under **Scripting**.
+
+Repository: `https://repository.data-hopper.com/repository/hop-community-plugins/`  
+GAV: `org.projectdatahopper.hop:hop-pentaho-formula:{version}` (zip, including LGPL libformula)
+
+If `data-hopper-community` is already imported (from hop-pentaho-reporting or
+hopper-edw), re-import updates plugin metadata; with **browse** enabled the zip
+is also listed live from Nexus.
 
 ## Kettle / PDI import
 
@@ -87,6 +136,14 @@ are left unchanged.
 - Function arguments separated by `;`
 - Example: `IF([flag];"yes";"no")`
 
-## Marketplace
+## Modules
 
-See [hop-marketplace-repo.yaml](hop-marketplace-repo.yaml).
+```text
+hop-pentaho-formula/
+  plugins/pentaho-formula/          # transform jar
+  assemblies/pentaho-formula/       # installable zip
+  samples/                          # example pipelines
+  Jenkinsfile.marketplace           # zip → hop-community-plugins
+  scripts/publish-to-marketplace.sh # local Nexus publish
+  hop-marketplace-repo.yaml         # Hop 2.19+ marketplace import
+```
