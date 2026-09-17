@@ -1,19 +1,15 @@
 /*
- * Copyright (C) 2026 Project Data Hopper
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.projectdatahopper.hop.pipeline.transforms.pentahoformula;
@@ -21,31 +17,25 @@ package org.projectdatahopper.hop.pipeline.transforms.pentahoformula;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.hop.core.exception.HopValueException;
 import org.apache.hop.core.row.IRowMeta;
 import org.apache.hop.core.row.IValueMeta;
-import org.pentaho.reporting.libraries.base.config.Configuration;
-import org.pentaho.reporting.libraries.formula.DefaultFormulaContext;
-import org.pentaho.reporting.libraries.formula.ErrorValue;
-import org.pentaho.reporting.libraries.formula.EvaluationException;
-import org.pentaho.reporting.libraries.formula.FormulaContext;
-import org.pentaho.reporting.libraries.formula.LibFormulaErrorValue;
-import org.pentaho.reporting.libraries.formula.LocalizationContext;
-import org.pentaho.reporting.libraries.formula.function.FunctionRegistry;
-import org.pentaho.reporting.libraries.formula.operators.OperatorFactory;
-import org.pentaho.reporting.libraries.formula.typing.Type;
-import org.pentaho.reporting.libraries.formula.typing.TypeRegistry;
-import org.pentaho.reporting.libraries.formula.typing.coretypes.AnyType;
-import org.pentaho.reporting.libraries.formula.typing.coretypes.NumberType;
-import org.pentaho.reporting.libraries.formula.typing.coretypes.TextType;
+import org.projectdatahopper.hop.formula.DefaultFormulaContext;
+import org.projectdatahopper.hop.formula.EvaluationException;
+import org.projectdatahopper.hop.formula.FormulaContext;
+import org.projectdatahopper.hop.formula.LocalizationContext;
+import org.projectdatahopper.hop.formula.error.FormulaErrorValue;
+import org.projectdatahopper.hop.formula.function.FunctionRegistry;
+import org.projectdatahopper.hop.formula.typing.DataType;
+import org.projectdatahopper.hop.formula.typing.TypeRegistry;
 
 /**
- * libformula context that resolves {@code [field]} references against the current Hop row.
- *
- * <p>Port of PDI {@code RowForumulaContext} (Apache-2.0, 9.4), with the class-name typo corrected.
+ * Formula context that resolves {@code [field]} references against the current Hop row.
  */
 @Getter
 @Setter
@@ -63,19 +53,21 @@ public class RowFormulaContext implements FormulaContext {
   }
 
   @Override
-  public Type resolveReferenceType(Object name) {
+  public DataType resolveReferenceType(Object name) {
     if (name instanceof String fieldName) {
       IValueMeta valueMeta = this.rowMeta.searchValueMeta(fieldName);
       if (valueMeta != null) {
         return switch (valueMeta.getType()) {
-          case IValueMeta.TYPE_STRING -> TextType.TYPE;
+          case IValueMeta.TYPE_STRING -> DataType.TEXT;
           case IValueMeta.TYPE_INTEGER, IValueMeta.TYPE_BIGNUMBER, IValueMeta.TYPE_NUMBER ->
-              NumberType.GENERIC_NUMBER;
-          default -> AnyType.TYPE;
+              DataType.NUMBER;
+          case IValueMeta.TYPE_BOOLEAN -> DataType.LOGICAL;
+          case IValueMeta.TYPE_DATE, IValueMeta.TYPE_TIMESTAMP -> DataType.DATETIME;
+          default -> DataType.ANY;
         };
       }
     }
-    return AnyType.TYPE;
+    return DataType.ANY;
   }
 
   @Override
@@ -88,9 +80,7 @@ public class RowFormulaContext implements FormulaContext {
       } else {
         int index = rowMeta.indexOfValue(fieldName);
         if (index < 0) {
-          ErrorValue errorValue =
-              new LibFormulaErrorValue(LibFormulaErrorValue.ERROR_INVALID_ARGUMENT);
-          throw new EvaluationException(errorValue);
+          throw new EvaluationException(FormulaErrorValue.ERROR_INVALID_ARGUMENT_VALUE);
         }
         valueMeta = rowMeta.getValueMeta(index);
         valueIndexMap.put(fieldName, index);
@@ -100,20 +90,25 @@ public class RowFormulaContext implements FormulaContext {
       try {
         return getPrimitive(valueMeta, valueData);
       } catch (HopValueException e) {
-        throw new EvaluationException(LibFormulaErrorValue.ERROR_ARITHMETIC_VALUE);
+        throw new EvaluationException(FormulaErrorValue.ERROR_ARITHMETIC_VALUE, e);
       }
     }
     return null;
   }
 
   @Override
-  public Configuration getConfiguration() {
-    return formulaContext.getConfiguration();
+  public boolean isReferenceDirty(Object name) throws EvaluationException {
+    return formulaContext.isReferenceDirty(name);
   }
 
   @Override
-  public FunctionRegistry getFunctionRegistry() {
-    return formulaContext.getFunctionRegistry();
+  public Locale getLocale() {
+    return formulaContext.getLocale();
+  }
+
+  @Override
+  public TimeZone getTimeZone() {
+    return formulaContext.getTimeZone();
   }
 
   @Override
@@ -122,18 +117,13 @@ public class RowFormulaContext implements FormulaContext {
   }
 
   @Override
-  public OperatorFactory getOperatorFactory() {
-    return formulaContext.getOperatorFactory();
-  }
-
-  @Override
   public TypeRegistry getTypeRegistry() {
     return formulaContext.getTypeRegistry();
   }
 
   @Override
-  public boolean isReferenceDirty(Object name) throws EvaluationException {
-    return formulaContext.isReferenceDirty(name);
+  public FunctionRegistry getFunctionRegistry() {
+    return formulaContext.getFunctionRegistry();
   }
 
   @Override

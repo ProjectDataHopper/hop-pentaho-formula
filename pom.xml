@@ -11,21 +11,21 @@
 
   <name>Hop Pentaho Formula</name>
   <description>
-    Third-party Apache Hop transform plugin that evaluates OpenFormula expressions
-    using Pentaho libformula (LGPL). Ports the PDI Formula step. Not an Apache
-    Software Foundation release.
+    Apache Hop transform plugin that evaluates OpenFormula expressions
+    using hop-formula (Apache-2.0). Ports the PDI Formula step.
   </description>
   <url>https://github.com/ProjectDataHopper/hop-pentaho-formula</url>
 
   <licenses>
     <license>
-      <name>GNU Lesser General Public License, Version 2.1</name>
-      <url>https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt</url>
+      <name>Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
 
   <modules>
+    <module>hop-formula</module>
     <module>plugins/pentaho-formula</module>
     <module>assemblies/pentaho-formula</module>
   </modules>
@@ -38,14 +38,10 @@
     <!-- Marketplace install UI needs Hop 2.19+. Override: -Dhop.version=2.20.0-SNAPSHOT -->
     <hop.version>2.19.0</hop.version>
 
-    <!-- LGPL libformula line (9.4 / 10.0 / 10.1). 10.2+ is BSL — do not use. -->
-    <libformula.version>10.1.0.0-SNAPSHOT</libformula.version>
-
     <marketplace.groupId>org.projectdatahopper.hop</marketplace.groupId>
     <marketplace.artifactId>hop-pentaho-formula</marketplace.artifactId>
     <hop.community.nexus.url>https://repository.data-hopper.com/repository/hop-community-plugins/</hop.community.nexus.url>
     <hop.community.nexus.serverId>hop-community-plugins</hop.community.nexus.serverId>
-    <pentaho.reporting.lgpl.nexus.url>https://repository.data-hopper.com/repository/pentaho-reporting-lgpl/</pentaho.reporting.lgpl.nexus.url>
 
     <lombok.version>1.18.42</lombok.version>
     <jandex.version>3.5.3</jandex.version>
@@ -98,9 +94,9 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
-        <groupId>org.pentaho.reporting.library</groupId>
-        <artifactId>libformula</artifactId>
-        <version>${libformula.version}</version>
+        <groupId>org.projectdatahopper.hop</groupId>
+        <artifactId>hop-formula</artifactId>
+        <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>org.projectdatahopper.hop</groupId>
@@ -183,17 +179,6 @@
       <url>https://repository.apache.org/snapshots/</url>
       <releases>
         <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>pentaho-reporting-lgpl</id>
-      <name>Data Hopper LGPL reporting engine</name>
-      <url>${pentaho.reporting.lgpl.nexus.url}</url>
-      <releases>
-        <enabled>true</enabled>
       </releases>
       <snapshots>
         <enabled>true</enabled>

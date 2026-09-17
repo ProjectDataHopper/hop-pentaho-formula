@@ -53,7 +53,6 @@ pipeline {
     MAVEN_OPTS = '-Xmx2g'
     GROUP_ID = 'org.projectdatahopper.hop'
     ARTIFACT_ID = 'hop-pentaho-formula'
-    LIBFORMULA_VERSION = '10.1.0.0-SNAPSHOT'
     HOP_VERSION = "${params.HOP_VERSION}"
     NEXUS_URL = "${params.NEXUS_URL}"
     NEXUS_SERVER_ID = "${params.NEXUS_SERVER_ID}"
@@ -72,26 +71,6 @@ pipeline {
           set -euo pipefail
           java -version
           mvn -version
-        '''
-      }
-    }
-
-    stage('Check libformula on Maven') {
-      steps {
-        sh '''
-          set -euo pipefail
-          # The zip packages libformula (+ deps) from Maven into plugin lib/.
-          echo "Resolving libformula for packaging (hop.version=${HOP_VERSION})..."
-          if mvn -B -q dependency:get \
-              -Dartifact=org.pentaho.reporting.library:libformula:${LIBFORMULA_VERSION} \
-              -DremoteRepositories=https://repository.data-hopper.com/repository/pentaho-reporting-lgpl/ \
-              2>/dev/null; then
-            echo "OK: libformula available from pentaho-reporting-lgpl Nexus"
-          else
-            echo "ERROR: Need LGPL libformula to package into the marketplace zip."
-            echo "  Run job pentaho-reporting-lgpl-engine so libformula is on pentaho-reporting-lgpl."
-            exit 1
-          fi
         '''
       }
     }
@@ -134,11 +113,6 @@ pipeline {
           <url>https://repo.maven.apache.org/maven2</url>
         </repository>
         <repository>
-          <id>pentaho-reporting-lgpl</id>
-          <url>https://repository.data-hopper.com/repository/pentaho-reporting-lgpl/</url>
-          <snapshots><enabled>true</enabled></snapshots>
-        </repository>
-        <repository>
           <id>${serverId}</id>
           <url>${deployUrl}</url>
           <snapshots><enabled>true</enabled></snapshots>
@@ -164,10 +138,9 @@ pipeline {
           if [ "${SKIP_TESTS}" = "true" ]; then
             TEST_FLAGS="-DskipTests"
           fi
-          # Packages transform jar + libformula (+ deps) into the zip under lib/
+          # Packages transform jar + hop-formula into the zip under lib/
           mvn -B -s "${WORKSPACE}/ci-settings.xml" clean package ${TEST_FLAGS} \
-            -Dhop.version="${HOP_VERSION}" \
-            -Dlibformula.version="${LIBFORMULA_VERSION}"
+            -Dhop.version="${HOP_VERSION}"
         '''
       }
     }

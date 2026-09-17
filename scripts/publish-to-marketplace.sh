@@ -4,10 +4,10 @@
 # Prerequisites:
 #   - libformula 10.1 resolvable from pentaho-reporting-lgpl (engine Jenkins job)
 #   - Hop APIs in local m2 (hop.version)
-#   - Nexus deploy credentials
+#   - Nexus deploy credentials in gitignored nexus-vars.sh (NEXUS_USER / NEXUS_PASSWORD)
+#     or already exported in the environment
 #
 # Usage:
-#   export NEXUS_USER=... NEXUS_PASSWORD=...
 #   ./scripts/publish-to-marketplace.sh
 #   ./scripts/publish-to-marketplace.sh --hop-version 2.19.0
 #   ./scripts/publish-to-marketplace.sh --dry-run
@@ -19,17 +19,14 @@ cd "${ROOT}"
 
 GROUP_ID="${GROUP_ID:-org.projectdatahopper.hop}"
 ARTIFACT_ID="${ARTIFACT_ID:-hop-pentaho-formula}"
-# Hard defaults: workstation env often has NEXUS_REPO_ID/NEXUS_URL for a different repo.
 NEXUS_URL="https://repository.data-hopper.com/repository/hop-community-plugins/"
 NEXUS_REPO_ID="hop-community-plugins"
-LIBFORMULA_REPO="${LIBFORMULA_REPO:-https://repository.data-hopper.com/repository/pentaho-reporting-lgpl/}"
-LIBFORMULA_VERSION="${LIBFORMULA_VERSION:-10.1.0.0-SNAPSHOT}"
 HOP_VERSION="${HOP_VERSION:-}"
 DRY_RUN=0
 MVN="${MVN:-mvn}"
 
 usage() {
-  sed -n '2,20p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 while [[ $# -gt 0 ]]; do
@@ -49,21 +46,6 @@ NEXUS_URL="${NEXUS_URL%/}/"
 HOP_PROPS=()
 if [[ -n "${HOP_VERSION}" ]]; then
   HOP_PROPS+=(-Dhop.version="${HOP_VERSION}")
-fi
-
-# libformula (+ transitives) is packaged into the zip under plugin lib/.
-echo "==> Checking libformula is resolvable (for packaging into the zip)..."
-if ${MVN} -q dependency:get \
-    -Dartifact=org.pentaho.reporting.library:libformula:${LIBFORMULA_VERSION} \
-    -DremoteRepositories="${LIBFORMULA_REPO}" \
-    2>/dev/null; then
-  echo "    libformula ${LIBFORMULA_VERSION} OK from Nexus (will be bundled into the zip lib/)"
-else
-  echo "ERROR: Cannot package the marketplace zip without LGPL libformula." >&2
-  echo "  Publish libformula via the pentaho-reporting-lgpl-engine Jenkins job." >&2
-  echo "  Expected: org.pentaho.reporting.library:libformula:${LIBFORMULA_VERSION}" >&2
-  echo "  Repo: ${LIBFORMULA_REPO}" >&2
-  exit 1
 fi
 
 PLUGIN_VERSION="$(${MVN} -q -DforceStdout help:evaluate -Dexpression=project.version ${HOP_PROPS[@]+"${HOP_PROPS[@]}"} 2>/dev/null | tail -1)"
@@ -87,7 +69,7 @@ run() {
 }
 
 echo "==> mvn package"
-run ${MVN} -B clean package -DskipTests ${HOP_PROPS[@]+"${HOP_PROPS[@]}"} -Dlibformula.version="${LIBFORMULA_VERSION}"
+run ${MVN} -B clean package -DskipTests ${HOP_PROPS[@]+"${HOP_PROPS[@]}"}
 
 if [[ "${DRY_RUN}" -eq 1 ]]; then
   echo "DRY-RUN: would deploy ${ZIP_PATH}"
@@ -100,8 +82,26 @@ if [[ ! -f "${ZIP_PATH}" ]]; then
   exit 1
 fi
 
+# Workstation env often has NEXUS_* for a different Artifactory. nexus-vars.sh is
+# the auth for repository.data-hopper.com. Keep URL/repo id (CLI flags win).
+if [[ -f "${ROOT}/nexus-vars.sh" ]]; then
+  echo "==> Loading Nexus credentials from nexus-vars.sh"
+  _saved_url="${NEXUS_URL}"
+  _saved_id="${NEXUS_REPO_ID}"
+  # shellcheck disable=SC1091
+  set +u
+  # shellcheck source=/dev/null
+  source "${ROOT}/nexus-vars.sh"
+  set -u
+  NEXUS_URL="${_saved_url}"
+  NEXUS_REPO_ID="${_saved_id}"
+  unset _saved_url _saved_id
+fi
+
 if [[ -z "${NEXUS_USER:-}" || -z "${NEXUS_PASSWORD:-}" ]]; then
-  echo "NOTE: NEXUS_USER/NEXUS_PASSWORD not set; using Maven settings.xml server '${NEXUS_REPO_ID}'"
+  echo "NOTE: NEXUS_USER/NEXUS_PASSWORD not set (no nexus-vars.sh); using Maven settings.xml server '${NEXUS_REPO_ID}'"
+else
+  echo "    deploy user: ${NEXUS_USER}"
 fi
 
 SETTINGS=""

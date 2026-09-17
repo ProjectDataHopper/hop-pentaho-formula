@@ -1,30 +1,20 @@
 Hop Pentaho Formula
 Copyright 2026 Project Data Hopper and contributors
 
-This product is licensed under the GNU Lesser General Public License,
-version 2.1 (see LICENSE).
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
 
-This is a third-party plugin for Apache Hop. It is NOT an Apache Software
+This is a community plugin for Apache Hop. It is NOT an Apache Software
 Foundation release and is not distributed by the ASF.
 
 -------------------------------------------------------------------------------
 
-The transform implementation is a port of the historically Apache-2.0 licensed
-Formula step from Pentaho Data Integration (Kettle) 9.4.0.0-343, rewritten for
-the Apache Hop 2.19 transform and metadata APIs.
+The transform implementation ports the formula evaluation transform from
+Pentaho Data Integration (Kettle) to the Apache Hop transform and metadata APIs.
 
-Do not copy sources from pentaho-kettle master after the Business Source
-License (BSL) relicensing (2024+), including FormulaHelper.
-
--------------------------------------------------------------------------------
-Third-party runtime libraries (bundled in the plugin zip lib/)
-
-LibFormula and LibBase 10.1.x (LGPL-2.1)
-  Copyright Hitachi Vantara / Pentaho contributors
-  Group: org.pentaho.reporting.library
-
-  IMPORTANT: Do not use Pentaho Reporting / libformula 10.2 or later in this
-  project. Those versions are licensed under the Business Source License (BSL).
+Calculation engine:
+This product includes `hop-formula`, a clean-room OpenFormula (ODF 1.2 / OpenDocument-v1.2-part2)
+calculation engine developed under the Apache License, Version 2.0, with zero runtime
+dependencies. No code was copied or derived from the defunct LGPL/BSL Pentaho libformula library.
 
 "Pentaho" is a trademark of its respective owners and is used here only to
-describe compatibility with existing PDI Formula metadata.
+describe compatibility with existing PDI Formula pipeline metadata and expressions.

@@ -37,8 +37,9 @@
       <artifactId>lombok</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.pentaho.reporting.library</groupId>
-      <artifactId>libformula</artifactId>
+      <groupId>org.projectdatahopper.hop</groupId>
+      <artifactId>hop-formula</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

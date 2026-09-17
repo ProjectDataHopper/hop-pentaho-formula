@@ -1,30 +1,29 @@
 # Hop Pentaho Formula
 
-Third-party **Apache Hop** transform plugin that evaluates **OpenFormula** expressions
-with Pentaho **libformula** (LGPL). This is a port of the PDI Formula step for Hop
-2.19.0+.
+**Apache Hop** transform plugin that evaluates **OpenFormula** expressions
+using **`hop-formula`**, a clean-room Apache-2.0 calculation engine. This is a port
+of the PDI Formula step for Hop 2.19.0+.
 
 | | |
 |---|---|
-| License | **LGPL-2.1** (see [LICENSE](LICENSE)) |
+| License | **Apache-2.0** (see [LICENSE](LICENSE)) |
 | Hop | 2.19.0+ (Java 21) |
-| Engine | libformula **10.1.x** LGPL |
+| Engine | **`hop-formula`** (clean-room OpenFormula engine, zero external runtime dependencies) |
 | Plugin id | `PentahoFormula` |
 | Marketplace | **[1.0.0](https://github.com/ProjectDataHopper/hop-pentaho-formula/releases/tag/v1.0.0)** (`org.projectdatahopper.hop:hop-pentaho-formula:1.0.0`) |
 | `main` | `1.1.0-SNAPSHOT` |
-| ASF? | **No** — cannot ship inside Apache Hop (LGPL libformula) |
+| ASF-compatible? | **Yes** — pure Apache-2.0 license, zero LGPL/BSL code or dependencies |
 
 ## Why this exists
 
 Apache Hop already has a **Formula** transform. That one uses **Apache POI** (Excel
-formulas, comma-separated arguments). PDI Formula uses **libformula** (OpenFormula,
+formulas, comma-separated arguments). PDI Formula uses **OpenFormula** (ODF 1.2,
 `;` arguments, `[field]` references). The dialects are not the same.
 
-PDI Formula was never ported into Apache Hop because libformula is LGPL. This
-repository provides it as an **external** marketplace plugin so migrators keep
-existing PDI Formula semantics.
-
-Do **not** use libformula / Pentaho Reporting 10.2+ (Business Source License).
+PDI Formula was originally not included in Apache Hop because the historical Pentaho
+engine (`libformula`) was LGPL (and later relicensed to BSL). This repository provides:
+1. **`hop-formula`**: a clean-room, zero-dependency Apache-2.0 OpenFormula calculation engine.
+2. **`PentahoFormula`**: a Hop transform preserving 100% backward compatibility with PDI Formula pipelines.
 
 ## Build
 
@@ -33,7 +32,6 @@ Requirements:
 - JDK 21
 - Maven 3.9+
 - Apache Hop 2.19.0 artifacts (`~/.m2` or Maven Central)
-- libformula 10.1 from [pentaho-reporting-lgpl](https://repository.data-hopper.com/#browse/browse:pentaho-reporting-lgpl:org%2Fpentaho%2Freporting%2Flibrary%2Flibformula)
 
 ```bash
 mvn clean package
@@ -49,7 +47,7 @@ assemblies/pentaho-formula/target/hop-pentaho-formula-1.1.0-SNAPSHOT.zip
 
 ### Manual zip
 
-Download [hop-pentaho-formula-1.0.0.zip](https://github.com/ProjectDataHopper/hop-pentaho-formula/releases/download/v1.0.0/hop-pentaho-formula-1.0.0.zip) and unzip into the **Hop client root**:
+Download `hop-pentaho-formula-*.zip` and unzip into the **Hop client root**:
 
 ```bash
 unzip hop-pentaho-formula-*.zip -d "$HOP_HOME"
@@ -63,7 +61,7 @@ $HOP_HOME/plugins/transforms/pentaho-formula/
   version.xml
   LICENSE
   NOTICE
-  lib/          # libformula, libbase, …
+  lib/          # hop-formula
 ```
 
 Restart Hop. The transform appears as **Pentaho Formula** in the Scripting category
@@ -73,12 +71,11 @@ Hop's built-in POI Formula transform remains installed and is a different plugin
 
 ### Hop 2.19 marketplace (Nexus)
 
-You publish **one zip** that already includes the transform **and** libformula
-jars under `lib/`. Users only install that zip.
+You publish **one zip** that already includes the transform **and** `hop-formula`
+jar under `lib/`. Users only install that zip.
 
 ```bash
-# After libformula is on pentaho-reporting-lgpl (engine Jenkins job)
-export NEXUS_USER=... NEXUS_PASSWORD=...
+# Credentials: gitignored nexus-vars.sh (NEXUS_USER / NEXUS_PASSWORD)
 ./scripts/publish-to-marketplace.sh
 ```
 
@@ -102,16 +99,16 @@ Example install session:
 
 ```text
 $ sh hop marketplace install hop-pentaho-formula
-Resolved hop-pentaho-formula → org.projectdatahopper.hop:hop-pentaho-formula:1.0.0 (prefer repo 'data-hopper-community')
-… Marketplace - Downloading org.projectdatahopper.hop:hop-pentaho-formula:1.0.0 from https://repository.data-hopper.com/repository/hop-community-plugins/…
-… Marketplace - Installed org.projectdatahopper.hop:hop-pentaho-formula:1.0.0. Restart Hop to load the plugin.
+Resolved hop-pentaho-formula → org.projectdatahopper.hop:hop-pentaho-formula:1.1.0-SNAPSHOT (prefer repo 'data-hopper-community')
+… Marketplace - Downloading org.projectdatahopper.hop:hop-pentaho-formula:1.1.0-SNAPSHOT from https://repository.data-hopper.com/repository/hop-community-plugins/…
+… Marketplace - Installed org.projectdatahopper.hop:hop-pentaho-formula:1.1.0-SNAPSHOT. Restart Hop to load the plugin.
 Plugin … installed under <HOP_HOME> from repo 'data-hopper-community'. Restart Hop to load it.
 ```
 
 After restart, the transform **Pentaho Formula** appears under **Scripting**.
 
 Repository: `https://repository.data-hopper.com/repository/hop-community-plugins/`  
-GAV: `org.projectdatahopper.hop:hop-pentaho-formula:{version}` (zip, including LGPL libformula)
+GAV: `org.projectdatahopper.hop:hop-pentaho-formula:{version}` (zip)
 
 If `data-hopper-community` is already imported (from hop-pentaho-reporting or
 hopper-edw), re-import updates plugin metadata; with **browse** enabled the zip
@@ -142,8 +139,9 @@ are left unchanged.
 
 ```text
 hop-pentaho-formula/
-  plugins/pentaho-formula/          # transform jar
-  assemblies/pentaho-formula/       # installable zip
+  hop-formula/                      # clean-room OpenFormula calculation engine
+  plugins/pentaho-formula/          # Hop transform jar & editor
+  assemblies/pentaho-formula/       # installable plugin zip
   samples/                          # example pipelines
   Jenkinsfile.marketplace           # zip → hop-community-plugins
   scripts/publish-to-marketplace.sh # local Nexus publish
